@@ -8,7 +8,7 @@ import numpy as np
 from arch import arch_model
 
 # Title of the dashboard
-st.title("Analysis Across States and Districts of INDIA")
+st.title("Analysis Across States, Crops, and Districts of INDIA")
 
 # Default image for the initial clean dashboard
 default_image = "India Map.jpeg"  # Replace with your actual default image file
@@ -45,9 +45,16 @@ try:
         # Additional dropdown for state-level analysis type
         state_analysis_type = st.sidebar.selectbox('Select State Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
 
-        # Extracting districts for the selected state
-        district_columns = [col for col in district_price_data.columns if col.startswith(selected_state + '_')]
-        districts = [col.replace(f"{selected_state}_", "") for col in district_columns]
+        # Extracting crops for the selected state
+        crop_columns = [col for col in district_price_data.columns if col.startswith(selected_state + '_')]
+        crops = list(set([col.replace(f"{selected_state}_", "").split('_')[0] for col in crop_columns]))
+
+        # Sidebar for crop selection
+        selected_crop = st.sidebar.selectbox('Select a Crop', ['Select a Crop'] + crops)
+
+        # Extracting districts for the selected state and crop
+        district_columns = [col for col in crop_columns if f"{selected_state}_{selected_crop}" in col]
+        districts = [col.replace(f"{selected_state}_{selected_crop}_", "") for col in district_columns]
 
         # Sidebar for district selection if districts are available
         selected_district = None
@@ -81,7 +88,7 @@ try:
                 line=dict(color=line_color, width=2)
             ))
         else:
-            full_district_column = f"{selected_state}_{selected_district}"
+            full_district_column = f"{selected_state}_{selected_crop}_{selected_district}"
 
             # Additional dropdown for district-level analysis type
             district_analysis_type = st.sidebar.selectbox('Select District Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
@@ -102,10 +109,10 @@ try:
                 line_color = 'cyan'
 
             fig.add_trace(go.Scatter(
-                x=price_data["Price Date"], 
+                x=district_price_data["Price Date"], 
                 y=district_y_values, 
                 mode='lines', 
-                name=f"{district_analysis_type} in {selected_district}, {selected_state}",
+                name=f"{district_analysis_type} in {selected_district} ({selected_crop}), {selected_state}",
                 line=dict(color=line_color, width=2)
             ))
 
