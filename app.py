@@ -11,7 +11,7 @@ from arch import arch_model
 st.title("Brinjal Price Analysis Across States and Districts")
 
 # Default image for the initial clean dashboard
-default_image = "default_image.png"  # Replace with your actual default image file
+default_image = "India Map.jpeg"  # Replace with your actual default image file
 
 # Automatically reading the CSV files
 price_file_path = "State_Modal_Price.csv"
