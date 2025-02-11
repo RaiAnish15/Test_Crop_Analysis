@@ -14,7 +14,7 @@ st.title("Analysis Across States and Districts of INDIA")
 default_image = "India Map.jpeg"  # Replace with your actual default image file
 
 # Automatically reading the CSV files
-price_file_path = "State_Modal_Price (2).csv"
+price_file_path = "State_Modal_Price.csv"
 volatility_file_path = "State_Conditional_Volatility.csv"
 district_price_file_path = "District Modal price.csv"
 district_volatility_file_path = "District_Conditional_Volatility.csv"
