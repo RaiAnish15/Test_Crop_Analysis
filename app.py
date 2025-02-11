@@ -17,7 +17,7 @@ import plotly.graph_objects as go
 st.title("Brinjal Price Analysis Across States")
 
 # Uploading the Excel file
-uploaded_file = st.file_uploader("Upload the State Modal Price Excel File", type=["xlsx"])
+uploaded_file = st.file_uploader("Upload the State Modal Price Excel File", type=["csv"])
 
 if uploaded_file is not None:
     # Reading the Excel file
