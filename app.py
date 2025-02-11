@@ -109,7 +109,7 @@ try:
                 line_color = 'cyan'
 
             fig.add_trace(go.Scatter(
-                x=district_price_data["Price Date"], 
+                x=price_data["Price Date"], 
                 y=district_y_values, 
                 mode='lines', 
                 name=f"{district_analysis_type} in {selected_district} ({selected_crop}), {selected_state}",
