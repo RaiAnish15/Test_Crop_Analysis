@@ -11,12 +11,13 @@ from arch import arch_model
 st.title("Brinjal Price Analysis Across States and Districts")
 
 # Default image for the initial clean dashboard
-default_image = "India Map.jpeg"  # Replace with your actual default image file
+default_image = "default_image.png"  # Replace with your actual default image file
 
 # Automatically reading the CSV files
 price_file_path = "State_Modal_Price.csv"
 volatility_file_path = "State_Conditional_Volatility.csv"
 district_price_file_path = "District_Modal_Price.csv"
+district_volatility_file_path = "District_Conditional_Volatility.csv"
 
 try:
     # Reading the price data CSV file
@@ -31,14 +32,18 @@ try:
     district_price_data = pd.read_csv(district_price_file_path)
     district_price_data["Price Date"] = pd.to_datetime(district_price_data["Price Date"])
 
+    # Reading the district-level conditional volatility CSV file
+    district_volatility_data = pd.read_csv(district_volatility_file_path)
+    district_volatility_data["Price Date"] = pd.to_datetime(district_volatility_data["Price Date"])
+
     states = list(price_data.columns[1:])  # Excluding 'Price Date' column
 
     # Sidebar for state selection
     selected_state = st.sidebar.selectbox('Select a State', ['Select a State'] + states)
 
     if selected_state != 'Select a State':
-        # Additional dropdown for analysis type
-        analysis_type = st.sidebar.selectbox('Select Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
+        # Additional dropdown for state-level analysis type
+        state_analysis_type = st.sidebar.selectbox('Select State Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
 
         # Extracting districts for the selected state
         district_columns = [col for col in district_price_data.columns if col.startswith(selected_state + '_')]
@@ -53,17 +58,17 @@ try:
         fig = go.Figure()
 
         if selected_district == 'Select a District' or selected_district is None:
-            if analysis_type == 'Modal Price':
+            if state_analysis_type == 'Modal Price':
                 y_values = price_data[selected_state]
                 y_label = "Modal Price (Rs./Quintal)"
                 line_color = 'purple'
             
-            elif analysis_type == 'Log Return':
+            elif state_analysis_type == 'Log Return':
                 y_values = np.log(price_data[selected_state]) - np.log(price_data[selected_state].shift(1))
                 y_label = "Log Return"
                 line_color = 'orange'
 
-            elif analysis_type == 'Conditional Volatility':
+            elif state_analysis_type == 'Conditional Volatility':
                 y_values = volatility_data[selected_state]
                 y_label = "Conditional Volatility"
                 line_color = 'green'
@@ -72,33 +77,35 @@ try:
                 x=price_data["Price Date"], 
                 y=y_values, 
                 mode='lines', 
-                name=f"{analysis_type} in {selected_state}",
+                name=f"{state_analysis_type} in {selected_state}",
                 line=dict(color=line_color, width=2)
             ))
         else:
             full_district_column = f"{selected_state}_{selected_district}"
 
-            if analysis_type == 'Modal Price':
+            # Additional dropdown for district-level analysis type
+            district_analysis_type = st.sidebar.selectbox('Select District Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
+
+            if district_analysis_type == 'Modal Price':
                 district_y_values = district_price_data[full_district_column]
                 y_label = "Modal Price (Rs./Quintal)"
                 line_color = 'blue'
             
-            elif analysis_type == 'Log Return':
+            elif district_analysis_type == 'Log Return':
                 district_y_values = np.log(district_price_data[full_district_column]) - np.log(district_price_data[full_district_column].shift(1))
                 y_label = "Log Return"
                 line_color = 'red'
 
-            elif analysis_type == 'Conditional Volatility':
-                # Assuming conditional volatility data for districts is not available, using placeholder
-                district_y_values = np.random.uniform(0.1, 1.0, size=len(district_price_data))  # Replace with actual data if available
+            elif district_analysis_type == 'Conditional Volatility':
+                district_y_values = district_volatility_data[full_district_column]
                 y_label = "Conditional Volatility"
                 line_color = 'cyan'
 
             fig.add_trace(go.Scatter(
-                x=district_price_data["Price Date"], 
+                x=district_volatility_data["Price Date"], 
                 y=district_y_values, 
                 mode='lines', 
-                name=f"{analysis_type} in {selected_district}, {selected_state}",
+                name=f"{district_analysis_type} in {selected_district}, {selected_state}",
                 line=dict(color=line_color, width=2)
             ))
 
@@ -127,4 +134,4 @@ try:
         st.image(default_image, caption="Brinjal Price Analysis", use_container_width=True)
 
 except FileNotFoundError:
-    st.error("The required CSV files were not found. Please make sure 'State_Modal_Price.csv', 'State_Conditional_Volatility.csv', and 'District_Modal_Price.csv' are in the working directory.")
+    st.error("The required CSV files were not found. Please make sure 'State_Modal_Price.csv', 'State_Conditional_Volatility.csv', 'District_Modal_Price.csv', and 'District_Conditional_Volatility.csv' are in the working directory.")
