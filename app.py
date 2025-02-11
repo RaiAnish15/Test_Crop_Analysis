@@ -1,5 +1,7 @@
 '''App to showcase the Crop Price Analysis: Madhya Pradesh'''
 
+'''App to showcase the Crop Price Analysis: Madhya Pradesh'''
+
 # Importing the necessary libraries
 import streamlit as st
 import pandas as pd
@@ -8,11 +10,12 @@ import numpy as np
 from arch import arch_model
 
 # Title of the dashboard
-st.title("Brinjal Price Analysis Across States")
+st.title("Brinjal Price Analysis Across States and Districts")
 
 # Automatically reading the CSV files
 price_file_path = "State_Modal_Price.csv"
 volatility_file_path = "State_Conditional_Volatility.csv"
+district_price_file_path = "District_Modal_Price.csv"
 
 try:
     # Reading the price data CSV file
@@ -23,10 +26,25 @@ try:
     volatility_data = pd.read_csv(volatility_file_path)
     volatility_data["Price Date"] = pd.to_datetime(volatility_data["Price Date"])
 
+    # Reading the district-level price data CSV file
+    district_price_data = pd.read_csv(district_price_file_path)
+    district_price_data["Price Date"] = pd.to_datetime(district_price_data["Price Date"])
+
     states = list(price_data.columns[1:])  # Excluding 'Price Date' column
 
     # Sidebar for state selection
     selected_state = st.sidebar.selectbox('Select a State', states)
+
+    # Extracting districts for the selected state
+    district_columns = [col for col in district_price_data.columns if col.startswith(selected_state + '_')]
+    districts = [col.replace(f"{selected_state}_", "") for col in district_columns]
+
+    # Sidebar for district selection if districts are available
+    if districts:
+        selected_district = st.sidebar.selectbox('Select a District', districts)
+        full_district_column = f"{selected_state}_{selected_district}"
+    else:
+        selected_district = None
 
     # Additional dropdown for analysis type
     analysis_type = st.sidebar.selectbox('Select Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
@@ -57,6 +75,17 @@ try:
         line=dict(color=line_color, width=2)
     ))
 
+    # Plot district data if a district is selected
+    if selected_district:
+        district_y_values = district_price_data[full_district_column]
+        fig.add_trace(go.Scatter(
+            x=district_price_data["Price Date"], 
+            y=district_y_values, 
+            mode='lines', 
+            name=f"Modal Price in {selected_district}, {selected_state}",
+            line=dict(color='blue', width=2, dash='dot')
+        ))
+
     fig.update_layout(
         xaxis_title="Date",
         yaxis_title=y_label,
@@ -80,4 +109,4 @@ try:
     st.plotly_chart(fig, use_container_width=True)
 
 except FileNotFoundError:
-    st.error("The required CSV files were not found. Please make sure 'State_Modal_Price.csv' and 'State_Conditional_Volatility.csv' are in the working directory.")
+    st.error("The required CSV files were not found. Please make sure 'State_Modal_Price.csv', 'State_Conditional_Volatility.csv', and 'District_Modal_Price.csv' are in the working directory.")
