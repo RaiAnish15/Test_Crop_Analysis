@@ -7,7 +7,6 @@ import plotly.graph_objects as go
 import numpy as np
 from arch import arch_model
 
-
 # Title of the dashboard
 st.title("Brinjal Price Analysis Across States")
 
@@ -25,19 +24,33 @@ try:
     # Sidebar for state selection
     selected_state = st.sidebar.selectbox('Select a State', states)
 
-    # Plotting the price of Brinjal for the selected state
+    # Additional dropdown for analysis type
+    analysis_type = st.sidebar.selectbox('Select Analysis Type', ['Modal Price', 'Log Return'])
+
+    # Plotting based on the selected analysis type
     fig = go.Figure()
+
+    if analysis_type == 'Modal Price':
+        y_values = data[selected_state]
+        y_label = "Modal Price (Rs./Quintal)"
+        line_color = 'purple'
+    
+    elif analysis_type == 'Log Return':
+        y_values = np.log(data[selected_state]) - np.log(data[selected_state].shift(1))
+        y_label = "Log Return"
+        line_color = 'orange'
+
     fig.add_trace(go.Scatter(
         x=data["Price Date"], 
-        y=data[selected_state], 
+        y=y_values, 
         mode='lines', 
-        name=f"Brinjal Price in {selected_state}",
-        line=dict(color='purple', width=2)
+        name=f"{analysis_type} in {selected_state}",
+        line=dict(color=line_color, width=2)
     ))
 
     fig.update_layout(
         xaxis_title="Date",
-        yaxis_title="Modal Price (Rs./Quintal)",
+        yaxis_title=y_label,
         template="plotly_dark",
         font=dict(color="white"),
         hovermode="x unified",
@@ -59,3 +72,4 @@ try:
 
 except FileNotFoundError:
     st.error("The file 'State_Modal_Price.csv' was not found. Please make sure it is in the working directory.")
+
