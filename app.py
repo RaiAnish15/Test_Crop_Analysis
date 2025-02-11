@@ -7,15 +7,16 @@ import plotly.graph_objects as go
 import numpy as np
 from arch import arch_model
 
+
 # Title of the dashboard
 st.title("Brinjal Price Analysis Across States")
 
-# Automatically reading the Excel file
+# Automatically reading the CSV file
 file_path = "State_Modal_Price.csv"
 
 try:
-    # Reading the Excel file
-    data = pd.read_excel(file_path)
+    # Reading the CSV file
+    data = pd.read_csv(file_path)
 
     # Assuming the first column is 'Price Date'
     data["Price Date"] = pd.to_datetime(data["Price Date"])
@@ -57,4 +58,4 @@ try:
     st.plotly_chart(fig, use_container_width=True)
 
 except FileNotFoundError:
-    st.error("The file 'State_Modal_Price.xlsx' was not found. Please make sure it is in the working directory.")
+    st.error("The file 'State_Modal_Price.csv' was not found. Please make sure it is in the working directory.")
