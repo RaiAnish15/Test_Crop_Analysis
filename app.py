@@ -17,7 +17,7 @@ default_image = "India Map.jpeg"  # Replace with your actual default image file
 price_file_path = "State_Modal_Price.csv"
 volatility_file_path = "State_Conditional_Volatility.csv"
 district_price_file_path = "District_Modal_price (1).csv"
-district_volatility_file_path = "District_Conditional_Volatility.csv"
+district_volatility_file_path = "District_Conditional_Volatility (1).csv"
 
 try:
     # Reading the price data CSV file
