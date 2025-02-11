@@ -8,7 +8,7 @@ import numpy as np
 from arch import arch_model
 
 # Title of the dashboard
-st.title("Brinjal Price Analysis Across States and Districts")
+st.title("Analysis Across States and Districts")
 
 # Default image for the initial clean dashboard
 default_image = "India Map.jpeg"  # Replace with your actual default image file
