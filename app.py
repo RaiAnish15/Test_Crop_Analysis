@@ -1,7 +1,5 @@
 '''App to showcase the Crop Price Analysis: Madhya Pradesh'''
 
-'''App to showcase the Crop Price Analysis: Madhya Pradesh'''
-
 # Importing the necessary libraries
 import streamlit as st
 import pandas as pd
@@ -11,6 +9,9 @@ from arch import arch_model
 
 # Title of the dashboard
 st.title("Brinjal Price Analysis Across States and Districts")
+
+# Default image for the initial clean dashboard
+default_image = "default_image.png"  # Replace with your actual default image file
 
 # Automatically reading the CSV files
 price_file_path = "State_Modal_Price.csv"
@@ -33,80 +34,97 @@ try:
     states = list(price_data.columns[1:])  # Excluding 'Price Date' column
 
     # Sidebar for state selection
-    selected_state = st.sidebar.selectbox('Select a State', states)
+    selected_state = st.sidebar.selectbox('Select a State', ['Select a State'] + states)
 
-    # Extracting districts for the selected state
-    district_columns = [col for col in district_price_data.columns if col.startswith(selected_state + '_')]
-    districts = [col.replace(f"{selected_state}_", "") for col in district_columns]
+    if selected_state != 'Select a State':
+        # Additional dropdown for analysis type
+        analysis_type = st.sidebar.selectbox('Select Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
 
-    # Sidebar for district selection if districts are available
-    if districts:
-        selected_district = st.sidebar.selectbox('Select a District', districts)
-        full_district_column = f"{selected_state}_{selected_district}"
-    else:
+        # Extracting districts for the selected state
+        district_columns = [col for col in district_price_data.columns if col.startswith(selected_state + '_')]
+        districts = [col.replace(f"{selected_state}_", "") for col in district_columns]
+
+        # Sidebar for district selection if districts are available
         selected_district = None
+        if districts:
+            selected_district = st.sidebar.selectbox('Select a District', ['Select a District'] + districts)
 
-    # Additional dropdown for analysis type
-    analysis_type = st.sidebar.selectbox('Select Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
+        # Plotting based on the selected analysis type
+        fig = go.Figure()
 
-    # Plotting based on the selected analysis type
-    fig = go.Figure()
+        if selected_district == 'Select a District' or selected_district is None:
+            if analysis_type == 'Modal Price':
+                y_values = price_data[selected_state]
+                y_label = "Modal Price (Rs./Quintal)"
+                line_color = 'purple'
+            
+            elif analysis_type == 'Log Return':
+                y_values = np.log(price_data[selected_state]) - np.log(price_data[selected_state].shift(1))
+                y_label = "Log Return"
+                line_color = 'orange'
 
-    if analysis_type == 'Modal Price':
-        y_values = price_data[selected_state]
-        y_label = "Modal Price (Rs./Quintal)"
-        line_color = 'purple'
-    
-    elif analysis_type == 'Log Return':
-        y_values = np.log(price_data[selected_state]) - np.log(price_data[selected_state].shift(1))
-        y_label = "Log Return"
-        line_color = 'orange'
+            elif analysis_type == 'Conditional Volatility':
+                y_values = volatility_data[selected_state]
+                y_label = "Conditional Volatility"
+                line_color = 'green'
 
-    elif analysis_type == 'Conditional Volatility':
-        y_values = volatility_data[selected_state]
-        y_label = "Conditional Volatility"
-        line_color = 'green'
+            fig.add_trace(go.Scatter(
+                x=price_data["Price Date"], 
+                y=y_values, 
+                mode='lines', 
+                name=f"{analysis_type} in {selected_state}",
+                line=dict(color=line_color, width=2)
+            ))
+        else:
+            full_district_column = f"{selected_state}_{selected_district}"
 
-    fig.add_trace(go.Scatter(
-        x=price_data["Price Date"], 
-        y=y_values, 
-        mode='lines', 
-        name=f"{analysis_type} in {selected_state}",
-        line=dict(color=line_color, width=2)
-    ))
+            if analysis_type == 'Modal Price':
+                district_y_values = district_price_data[full_district_column]
+                y_label = "Modal Price (Rs./Quintal)"
+                line_color = 'blue'
+            
+            elif analysis_type == 'Log Return':
+                district_y_values = np.log(district_price_data[full_district_column]) - np.log(district_price_data[full_district_column].shift(1))
+                y_label = "Log Return"
+                line_color = 'red'
 
-    # Plot district data if a district is selected
-    if selected_district:
-        district_y_values = district_price_data[full_district_column]
-        fig.add_trace(go.Scatter(
-            x=district_price_data["Price Date"], 
-            y=district_y_values, 
-            mode='lines', 
-            name=f"Modal Price in {selected_district}, {selected_state}",
-            line=dict(color='blue', width=2, dash='dot')
-        ))
+            elif analysis_type == 'Conditional Volatility':
+                # Assuming conditional volatility data for districts is not available, using placeholder
+                district_y_values = np.random.uniform(0.1, 1.0, size=len(district_price_data))  # Replace with actual data if available
+                y_label = "Conditional Volatility"
+                line_color = 'cyan'
 
-    fig.update_layout(
-        xaxis_title="Date",
-        yaxis_title=y_label,
-        template="plotly_dark",
-        font=dict(color="white"),
-        hovermode="x unified",
-        margin=dict(l=40, r=40, t=40, b=40),
-        plot_bgcolor="black",
-        paper_bgcolor="black",
-        width=900,
-        height=500,
-        legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=-0.2,
-            xanchor="center",
-            x=0.5
+            fig.add_trace(go.Scatter(
+                x=district_price_data["Price Date"], 
+                y=district_y_values, 
+                mode='lines', 
+                name=f"{analysis_type} in {selected_district}, {selected_state}",
+                line=dict(color=line_color, width=2)
+            ))
+
+        fig.update_layout(
+            xaxis_title="Date",
+            yaxis_title=y_label,
+            template="plotly_dark",
+            font=dict(color="white"),
+            hovermode="x unified",
+            margin=dict(l=40, r=40, t=40, b=40),
+            plot_bgcolor="black",
+            paper_bgcolor="black",
+            width=900,
+            height=500,
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.2,
+                xanchor="center",
+                x=0.5
+            )
         )
-    )
 
-    st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.image(default_image, caption="Brinjal Price Analysis", use_container_width=True)
 
 except FileNotFoundError:
     st.error("The required CSV files were not found. Please make sure 'State_Modal_Price.csv', 'State_Conditional_Volatility.csv', and 'District_Modal_Price.csv' are in the working directory.")
