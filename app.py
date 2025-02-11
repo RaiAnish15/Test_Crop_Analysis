@@ -11,7 +11,7 @@ from arch import arch_model
 st.title("Brinjal Price Analysis Across States")
 
 # Automatically reading the Excel file
-file_path = "State_Modal_Price.xlsx"
+file_path = "State_Modal_Price.csv"
 
 try:
     # Reading the Excel file
