@@ -23,22 +23,18 @@ try:
     # Reading the price data CSV file
     price_data = pd.read_csv(price_file_path)
     price_data["Price Date"] = pd.to_datetime(price_data["Price Date"])
-    price_data = price_data.sort_values("Price Date")  # Ensure dates are sorted
-
+    
     # Reading the conditional volatility CSV file
     volatility_data = pd.read_csv(volatility_file_path)
     volatility_data["Price Date"] = pd.to_datetime(volatility_data["Price Date"])
-    volatility_data = volatility_data.sort_values("Price Date")  # Ensure dates are sorted
 
     # Reading the district-level price data CSV file
     district_price_data = pd.read_csv(district_price_file_path)
     district_price_data["Price Date"] = pd.to_datetime(district_price_data["Price Date"])
-    district_price_data = district_price_data.sort_values("Price Date")  # Ensure dates are sorted
 
     # Reading the district-level conditional volatility CSV file
     district_volatility_data = pd.read_csv(district_volatility_file_path)
     district_volatility_data["Price Date"] = pd.to_datetime(district_volatility_data["Price Date"])
-    district_volatility_data = district_volatility_data.sort_values("Price Date")  # Ensure dates are sorted
 
     states = list(price_data.columns[1:])  # Excluding 'Price Date' column
 
@@ -63,25 +59,22 @@ try:
 
         if selected_district == 'Select a District' or selected_district is None:
             if state_analysis_type == 'Modal Price':
-                y_values = price_data[selected_state].fillna(method='ffill')  # Handle missing data
-                x_values = price_data["Price Date"]
+                y_values = price_data[selected_state]
                 y_label = "Modal Price (Rs./Quintal)"
                 line_color = 'purple'
             
             elif state_analysis_type == 'Log Return':
-                y_values = (np.log(price_data[selected_state]) - np.log(price_data[selected_state].shift(1))).fillna(0)
-                x_values = price_data["Price Date"]
+                y_values = np.log(price_data[selected_state]) - np.log(price_data[selected_state].shift(1))
                 y_label = "Log Return"
                 line_color = 'orange'
 
             elif state_analysis_type == 'Conditional Volatility':
-                y_values = volatility_data[selected_state].fillna(method='ffill')
-                x_values = volatility_data["Price Date"]
+                y_values = volatility_data[selected_state]
                 y_label = "Conditional Volatility"
                 line_color = 'green'
 
             fig.add_trace(go.Scatter(
-                x=x_values, 
+                x=district_price_data["Price Date"], 
                 y=y_values, 
                 mode='lines', 
                 name=f"{state_analysis_type} in {selected_state}",
@@ -94,25 +87,22 @@ try:
             district_analysis_type = st.sidebar.selectbox('Select District Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
 
             if district_analysis_type == 'Modal Price':
-                district_y_values = district_price_data[full_district_column].fillna(method='ffill')
-                x_values = district_price_data["Price Date"]
+                district_y_values = district_price_data[full_district_column]
                 y_label = "Modal Price (Rs./Quintal)"
                 line_color = 'blue'
             
             elif district_analysis_type == 'Log Return':
-                district_y_values = (np.log(district_price_data[full_district_column]) - np.log(district_price_data[full_district_column].shift(1))).fillna(0)
-                x_values = district_price_data["Price Date"]
+                district_y_values = np.log(district_price_data[full_district_column]) - np.log(district_price_data[full_district_column].shift(1))
                 y_label = "Log Return"
                 line_color = 'red'
 
             elif district_analysis_type == 'Conditional Volatility':
-                district_y_values = district_volatility_data[full_district_column].fillna(method='ffill')
-                x_values = district_volatility_data["Price Date"]
+                district_y_values = district_volatility_data[full_district_column]
                 y_label = "Conditional Volatility"
                 line_color = 'cyan'
 
             fig.add_trace(go.Scatter(
-                x=x_values, 
+                x=district_volatility_data["Price Date"], 
                 y=district_y_values, 
                 mode='lines', 
                 name=f"{district_analysis_type} in {selected_district}, {selected_state}",
@@ -122,11 +112,6 @@ try:
         fig.update_layout(
             xaxis_title="Date",
             yaxis_title=y_label,
-            xaxis=dict(
-                tickformat='%Y-%m',  # Ensure proper date format
-                tickangle=45,
-                dtick="M1"  # Monthly ticks for better spacing
-            ),
             template="plotly_dark",
             font=dict(color="white"),
             hovermode="x unified",
