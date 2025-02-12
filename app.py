@@ -128,7 +128,7 @@ try:
             if gpr_selected != 'Select GPR Plot':
                 gpr_file_path = f"GPR/{selected_state}_{gpr_selected.split()[0]}.gif"
                 if os.path.exists(gpr_file_path):
-                    plot_area.image(gpr_file_path, format="GIF", caption=f"{gpr_selected} for {selected_state}")
+                    plot_area.image(gpr_file_path, caption=f"{gpr_selected} for {selected_state}")
                 else:
                     st.warning(f"{gpr_selected} for {selected_state} not found. Ensure the file name is '{selected_state}_{gpr_selected.split()[0]}.gif' and it's in the GPR folder.")
 
