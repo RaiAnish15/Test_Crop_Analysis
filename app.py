@@ -67,37 +67,14 @@ try:
         if districts:
             selected_district = st.sidebar.selectbox('Select a District', ['Select a District'] + districts)
 
-        # Sidebar for selecting analysis or GPR plot
-        analysis_or_gpr = st.sidebar.selectbox('Select Analysis or GPR Plot', ['Analysis', 'GPR Plot'])
+        if selected_district != 'Select a District' and selected_district is not None:
+            # Sidebar for selecting analysis or GPR plot
+            analysis_or_gpr = st.sidebar.selectbox('Select Analysis or GPR Plot', ['Analysis', 'GPR Plot'])
 
-        if analysis_or_gpr == 'Analysis':
-            # Plotting based on the selected analysis type
-            fig = go.Figure()
+            if analysis_or_gpr == 'Analysis':
+                # Plotting based on the selected analysis type
+                fig = go.Figure()
 
-            if selected_district == 'Select a District' or selected_district is None:
-                if state_analysis_type == 'Modal Price':
-                    y_values = price_data[selected_state]
-                    y_label = "Modal Price (Rs./Quintal)"
-                    line_color = 'purple'
-                
-                elif state_analysis_type == 'Log Return':
-                    y_values = np.log(price_data[selected_state]) - np.log(price_data[selected_state].shift(1))
-                    y_label = "Log Return"
-                    line_color = 'orange'
-
-                elif state_analysis_type == 'Conditional Volatility':
-                    y_values = volatility_data[selected_state]
-                    y_label = "Conditional Volatility"
-                    line_color = 'green'
-
-                fig.add_trace(go.Scatter(
-                    x=price_data["Price Date"], 
-                    y=y_values, 
-                    mode='lines', 
-                    name=f"{state_analysis_type} in {selected_state}",
-                    line=dict(color=line_color, width=2)
-                ))
-            else:
                 full_district_column = f"{selected_state}_{selected_crop}_{selected_district}"
 
                 # Additional dropdown for district-level analysis type
@@ -147,37 +124,37 @@ try:
                         line=dict(color=line_color, width=2)
                     ))
 
-            fig.update_layout(
-                xaxis_title="Date",
-                yaxis_title=y_label,
-                template="plotly_dark",
-                font=dict(color="white"),
-                hovermode="x unified",
-                margin=dict(l=40, r=40, t=40, b=40),
-                plot_bgcolor="black",
-                paper_bgcolor="black",
-                width=900,
-                height=500,
-                legend=dict(
-                    orientation="h",
-                    yanchor="top",
-                    y=-0.2,
-                    xanchor="center",
-                    x=0.5
+                fig.update_layout(
+                    xaxis_title="Date",
+                    yaxis_title=y_label,
+                    template="plotly_dark",
+                    font=dict(color="white"),
+                    hovermode="x unified",
+                    margin=dict(l=40, r=40, t=40, b=40),
+                    plot_bgcolor="black",
+                    paper_bgcolor="black",
+                    width=900,
+                    height=500,
+                    legend=dict(
+                        orientation="h",
+                        yanchor="top",
+                        y=-0.2,
+                        xanchor="center",
+                        x=0.5
+                    )
                 )
-            )
 
-            st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, use_container_width=True)
 
-        elif analysis_or_gpr == 'GPR Plot':
-            gpr_gifs = ['2D Plot', '3D Plot']
-            selected_gpr_plot = st.sidebar.selectbox('Select GPR Plot', gpr_gifs)
-            
-            gpr_file_path = f"GPR/{selected_state}_{selected_gpr_plot.split()[0]}.gif"
-            if os.path.exists(gpr_file_path):
-                st.video(gpr_file_path, format="video/gif", caption=f"{selected_gpr_plot} for {selected_state}")
-            else:
-                st.warning(f"{selected_gpr_plot} for {selected_state} not found. Ensure the file name is '{selected_state}_{selected_gpr_plot.split()[0]}.gif' and it's in the GPR folder.")
+            elif analysis_or_gpr == 'GPR Plot':
+                gpr_gifs = ['2D Plot', '3D Plot']
+                selected_gpr_plot = st.sidebar.selectbox('Select GPR Plot', gpr_gifs)
+                
+                gpr_file_path = f"GPR/{selected_state}_{selected_gpr_plot.split()[0]}.gif"
+                if os.path.exists(gpr_file_path):
+                    st.video(gpr_file_path, format="video/gif", caption=f"{selected_gpr_plot} for {selected_state}")
+                else:
+                    st.warning(f"{selected_gpr_plot} for {selected_state} not found. Ensure the file name is '{selected_state}_{selected_gpr_plot.split()[0]}.gif' and it's in the GPR folder.")
 
     else:
         st.image(default_image, caption="Brinjal Price Analysis", use_container_width=True)
