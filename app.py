@@ -116,35 +116,32 @@ try:
             selected_district = st.sidebar.selectbox('Select a District', ['Select a District'] + districts)
 
         if selected_crop != 'Select a Crop':
-            # Sidebar for selecting analysis or GPR plot
-            analysis_or_gpr = st.sidebar.selectbox('Select Analysis or GPR Plot', ['Select Option', 'Analysis', 'GPR Plot'])
+            # Separate dropdowns for Analysis and GPR Plot
+            analysis_selected = st.sidebar.selectbox('Select Analysis', ['Select Analysis', 'Modal Price', 'Log Return', 'Conditional Volatility', 'Temperature', 'Precipitation'])
+            gpr_selected = st.sidebar.selectbox('Select GPR Plot', ['Select GPR Plot', '2D Plot', '3D Plot'])
 
-            if analysis_or_gpr == 'Analysis':
-                # Plotting based on the selected analysis type
+            if analysis_selected != 'Select Analysis':
                 fig = go.Figure()
 
                 if selected_district != 'Select a District' and selected_district is not None:
                     full_district_column = f"{selected_state}_{selected_crop}_{selected_district}"
 
-                    # Additional dropdown for district-level analysis type
-                    district_analysis_type = st.sidebar.selectbox('Select District Analysis Type', ['Select Analysis Type', 'Modal Price', 'Log Return', 'Conditional Volatility', 'Temperature', 'Precipitation'])
-
-                    if district_analysis_type == 'Modal Price':
+                    if analysis_selected == 'Modal Price':
                         district_y_values = district_price_data[full_district_column]
                         y_label = "Modal Price (Rs./Quintal)"
                         line_color = 'blue'
                     
-                    elif district_analysis_type == 'Log Return':
+                    elif analysis_selected == 'Log Return':
                         district_y_values = np.log(district_price_data[full_district_column]) - np.log(district_price_data[full_district_column].shift(1))
                         y_label = "Log Return"
                         line_color = 'red'
 
-                    elif district_analysis_type == 'Conditional Volatility':
+                    elif analysis_selected == 'Conditional Volatility':
                         district_y_values = district_volatility_data[full_district_column]
                         y_label = "Conditional Volatility"
                         line_color = 'cyan'
 
-                    elif district_analysis_type == 'Temperature':
+                    elif analysis_selected == 'Temperature':
                         temp_column = f"{selected_state}_{selected_district}_Temperature"
                         if temp_column in district_meteorological_data.columns:
                             district_y_values = district_meteorological_data[temp_column]
@@ -154,7 +151,7 @@ try:
                             st.warning(f"Temperature data for {selected_district} not found.")
                             district_y_values = None
 
-                    elif district_analysis_type == 'Precipitation':
+                    elif analysis_selected == 'Precipitation':
                         precip_column = f"{selected_state}_{selected_district}_Precipitation"
                         if precip_column in district_meteorological_data.columns:
                             district_y_values = district_meteorological_data[precip_column]
@@ -169,7 +166,7 @@ try:
                             x=price_data["Price Date"], 
                             y=district_y_values, 
                             mode='lines', 
-                            name=f"{district_analysis_type} in {selected_district} ({selected_crop}), {selected_state}",
+                            name=f"{analysis_selected} in {selected_district} ({selected_crop}), {selected_state}",
                             line=dict(color=line_color, width=2)
                         ))
 
@@ -195,16 +192,12 @@ try:
 
                 st.plotly_chart(fig, use_container_width=True)
 
-            elif analysis_or_gpr == 'GPR Plot':
-                gpr_gifs = ['2D Plot', '3D Plot']
-                selected_gpr_plot = st.sidebar.selectbox('Select GPR Plot', ['Select GPR Plot'] + gpr_gifs)
-                
-                if selected_gpr_plot != 'Select GPR Plot':
-                    gpr_file_path = f"GPR/{selected_state}_{selected_gpr_plot.split()[0]}.gif"
-                    if os.path.exists(gpr_file_path):
-                        st.video(gpr_file_path, format="video/gif", caption=f"{selected_gpr_plot} for {selected_state}")
-                    else:
-                        st.warning(f"{selected_gpr_plot} for {selected_state} not found. Ensure the file name is '{selected_state}_{selected_gpr_plot.split()[0]}.gif' and it's in the GPR folder.")
+            if gpr_selected != 'Select GPR Plot':
+                gpr_file_path = f"GPR/{selected_state}_{gpr_selected.split()[0]}.gif"
+                if os.path.exists(gpr_file_path):
+                    st.video(gpr_file_path, format="video/gif", caption=f"{gpr_selected} for {selected_state}")
+                else:
+                    st.warning(f"{gpr_selected} for {selected_state} not found. Ensure the file name is '{selected_state}_{gpr_selected.split()[0]}.gif' and it's in the GPR folder.")
 
     else:
         st.image(default_image, caption="Brinjal Price Analysis", use_container_width=True)
