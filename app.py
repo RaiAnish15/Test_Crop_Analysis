@@ -67,115 +67,118 @@ try:
         if districts:
             selected_district = st.sidebar.selectbox('Select a District', ['Select a District'] + districts)
 
-        # Plotting based on the selected analysis type
-        fig = go.Figure()
+        # Sidebar for selecting analysis or GPR plot
+        analysis_or_gpr = st.sidebar.selectbox('Select Analysis or GPR Plot', ['Analysis', 'GPR Plot'])
 
-        if selected_district == 'Select a District' or selected_district is None:
-            if state_analysis_type == 'Modal Price':
-                y_values = price_data[selected_state]
-                y_label = "Modal Price (Rs./Quintal)"
-                line_color = 'purple'
-            
-            elif state_analysis_type == 'Log Return':
-                y_values = np.log(price_data[selected_state]) - np.log(price_data[selected_state].shift(1))
-                y_label = "Log Return"
-                line_color = 'orange'
+        if analysis_or_gpr == 'Analysis':
+            # Plotting based on the selected analysis type
+            fig = go.Figure()
 
-            elif state_analysis_type == 'Conditional Volatility':
-                y_values = volatility_data[selected_state]
-                y_label = "Conditional Volatility"
-                line_color = 'green'
-
-            fig.add_trace(go.Scatter(
-                x=price_data["Price Date"], 
-                y=y_values, 
-                mode='lines', 
-                name=f"{state_analysis_type} in {selected_state}",
-                line=dict(color=line_color, width=2)
-            ))
-        else:
-            full_district_column = f"{selected_state}_{selected_crop}_{selected_district}"
-
-            # Additional dropdown for district-level analysis type
-            district_analysis_type = st.sidebar.selectbox('Select District Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility', 'Temperature', 'Precipitation'])
-
-            if district_analysis_type == 'Modal Price':
-                district_y_values = district_price_data[full_district_column]
-                y_label = "Modal Price (Rs./Quintal)"
-                line_color = 'blue'
-            
-            elif district_analysis_type == 'Log Return':
-                district_y_values = np.log(district_price_data[full_district_column]) - np.log(district_price_data[full_district_column].shift(1))
-                y_label = "Log Return"
-                line_color = 'red'
-
-            elif district_analysis_type == 'Conditional Volatility':
-                district_y_values = district_volatility_data[full_district_column]
-                y_label = "Conditional Volatility"
-                line_color = 'cyan'
-
-            elif district_analysis_type == 'Temperature':
-                temp_column = f"{selected_state}_{selected_district}_Temperature"
-                if temp_column in district_meteorological_data.columns:
-                    district_y_values = district_meteorological_data[temp_column]
-                    y_label = "Temperature (°C)"
+            if selected_district == 'Select a District' or selected_district is None:
+                if state_analysis_type == 'Modal Price':
+                    y_values = price_data[selected_state]
+                    y_label = "Modal Price (Rs./Quintal)"
+                    line_color = 'purple'
+                
+                elif state_analysis_type == 'Log Return':
+                    y_values = np.log(price_data[selected_state]) - np.log(price_data[selected_state].shift(1))
+                    y_label = "Log Return"
                     line_color = 'orange'
-                else:
-                    st.warning(f"Temperature data for {selected_district} not found.")
-                    district_y_values = None
 
-            elif district_analysis_type == 'Precipitation':
-                precip_column = f"{selected_state}_{selected_district}_Precipitation"
-                if precip_column in district_meteorological_data.columns:
-                    district_y_values = district_meteorological_data[precip_column]
-                    y_label = "Precipitation (mm)"
-                    line_color = 'blue'
-                else:
-                    st.warning(f"Precipitation data for {selected_district} not found.")
-                    district_y_values = None
+                elif state_analysis_type == 'Conditional Volatility':
+                    y_values = volatility_data[selected_state]
+                    y_label = "Conditional Volatility"
+                    line_color = 'green'
 
-            if district_y_values is not None:
                 fig.add_trace(go.Scatter(
                     x=price_data["Price Date"], 
-                    y=district_y_values, 
+                    y=y_values, 
                     mode='lines', 
-                    name=f"{district_analysis_type} in {selected_district} ({selected_crop}), {selected_state}",
+                    name=f"{state_analysis_type} in {selected_state}",
                     line=dict(color=line_color, width=2)
                 ))
+            else:
+                full_district_column = f"{selected_state}_{selected_crop}_{selected_district}"
 
-            # Dropdown to display GPR GIFs only after selection
-            show_gpr_plot = st.sidebar.checkbox('Show GPR Plot')
-            if show_gpr_plot:
-                gpr_gifs = ['2D Plot', '3D Plot']
-                selected_gpr_plot = st.sidebar.selectbox('Select GPR Plot', gpr_gifs)
+                # Additional dropdown for district-level analysis type
+                district_analysis_type = st.sidebar.selectbox('Select District Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility', 'Temperature', 'Precipitation'])
+
+                if district_analysis_type == 'Modal Price':
+                    district_y_values = district_price_data[full_district_column]
+                    y_label = "Modal Price (Rs./Quintal)"
+                    line_color = 'blue'
                 
-                gpr_file_path = f"GPR/{selected_state}_{selected_gpr_plot.split()[0]}.gif"
-                if os.path.exists(gpr_file_path):
-                    st.video(gpr_file_path, format="video/gif", caption=f"{selected_gpr_plot} for {selected_state}")
-                else:
-                    st.warning(f"{selected_gpr_plot} for {selected_state} not found. Ensure the file name is '{selected_state}_{selected_gpr_plot.split()[0]}.gif' and it's in the GPR folder.")
+                elif district_analysis_type == 'Log Return':
+                    district_y_values = np.log(district_price_data[full_district_column]) - np.log(district_price_data[full_district_column].shift(1))
+                    y_label = "Log Return"
+                    line_color = 'red'
 
-        fig.update_layout(
-            xaxis_title="Date",
-            yaxis_title=y_label,
-            template="plotly_dark",
-            font=dict(color="white"),
-            hovermode="x unified",
-            margin=dict(l=40, r=40, t=40, b=40),
-            plot_bgcolor="black",
-            paper_bgcolor="black",
-            width=900,
-            height=500,
-            legend=dict(
-                orientation="h",
-                yanchor="top",
-                y=-0.2,
-                xanchor="center",
-                x=0.5
+                elif district_analysis_type == 'Conditional Volatility':
+                    district_y_values = district_volatility_data[full_district_column]
+                    y_label = "Conditional Volatility"
+                    line_color = 'cyan'
+
+                elif district_analysis_type == 'Temperature':
+                    temp_column = f"{selected_state}_{selected_district}_Temperature"
+                    if temp_column in district_meteorological_data.columns:
+                        district_y_values = district_meteorological_data[temp_column]
+                        y_label = "Temperature (°C)"
+                        line_color = 'orange'
+                    else:
+                        st.warning(f"Temperature data for {selected_district} not found.")
+                        district_y_values = None
+
+                elif district_analysis_type == 'Precipitation':
+                    precip_column = f"{selected_state}_{selected_district}_Precipitation"
+                    if precip_column in district_meteorological_data.columns:
+                        district_y_values = district_meteorological_data[precip_column]
+                        y_label = "Precipitation (mm)"
+                        line_color = 'blue'
+                    else:
+                        st.warning(f"Precipitation data for {selected_district} not found.")
+                        district_y_values = None
+
+                if district_y_values is not None:
+                    fig.add_trace(go.Scatter(
+                        x=price_data["Price Date"], 
+                        y=district_y_values, 
+                        mode='lines', 
+                        name=f"{district_analysis_type} in {selected_district} ({selected_crop}), {selected_state}",
+                        line=dict(color=line_color, width=2)
+                    ))
+
+            fig.update_layout(
+                xaxis_title="Date",
+                yaxis_title=y_label,
+                template="plotly_dark",
+                font=dict(color="white"),
+                hovermode="x unified",
+                margin=dict(l=40, r=40, t=40, b=40),
+                plot_bgcolor="black",
+                paper_bgcolor="black",
+                width=900,
+                height=500,
+                legend=dict(
+                    orientation="h",
+                    yanchor="top",
+                    y=-0.2,
+                    xanchor="center",
+                    x=0.5
+                )
             )
-        )
 
-        st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
+
+        elif analysis_or_gpr == 'GPR Plot':
+            gpr_gifs = ['2D Plot', '3D Plot']
+            selected_gpr_plot = st.sidebar.selectbox('Select GPR Plot', gpr_gifs)
+            
+            gpr_file_path = f"GPR/{selected_state}_{selected_gpr_plot.split()[0]}.gif"
+            if os.path.exists(gpr_file_path):
+                st.video(gpr_file_path, format="video/gif", caption=f"{selected_gpr_plot} for {selected_state}")
+            else:
+                st.warning(f"{selected_gpr_plot} for {selected_state} not found. Ensure the file name is '{selected_state}_{selected_gpr_plot.split()[0]}.gif' and it's in the GPR folder.")
+
     else:
         st.image(default_image, caption="Brinjal Price Analysis", use_container_width=True)
 
