@@ -47,6 +47,8 @@ try:
     # Sidebar for state selection
     selected_state = st.sidebar.selectbox('Select a State', ['Select a State'] + states)
 
+    plot_area = st.empty()  # Placeholder for updating plots
+
     if selected_state != 'Select a State':
         # Additional dropdown for state-level analysis type
         state_analysis_type = st.sidebar.selectbox('Select State Analysis Type', ['Select Analysis Type', 'Modal Price', 'Log Return', 'Conditional Volatility'])
@@ -97,7 +99,7 @@ try:
                 )
             )
 
-            st.plotly_chart(fig, use_container_width=True)
+            plot_area.plotly_chart(fig, use_container_width=True)
 
         # Extracting crops for the selected state
         crop_columns = [col for col in district_price_data.columns if col.startswith(selected_state + '_')]
@@ -190,12 +192,12 @@ try:
                     )
                 )
 
-                st.plotly_chart(fig, use_container_width=True)
+                plot_area.plotly_chart(fig, use_container_width=True)
 
             if gpr_selected != 'Select GPR Plot':
                 gpr_file_path = f"GPR/{selected_state}_{gpr_selected.split()[0]}.gif"
                 if os.path.exists(gpr_file_path):
-                    st.video(gpr_file_path, format="video/gif", caption=f"{gpr_selected} for {selected_state}")
+                    plot_area.video(gpr_file_path, format="video/gif", caption=f"{gpr_selected} for {selected_state}")
                 else:
                     st.warning(f"{gpr_selected} for {selected_state} not found. Ensure the file name is '{selected_state}_{gpr_selected.split()[0]}.gif' and it's in the GPR folder.")
 
