@@ -122,6 +122,9 @@ try:
             analysis_selected = st.sidebar.selectbox('Select Analysis', ['Select Analysis', 'Modal Price', 'Log Return', 'Conditional Volatility', 'Temperature', 'Precipitation'])
             gpr_selected = st.sidebar.selectbox('Select GPR Plot', ['Select GPR Plot', '2D Plot', '3D Plot'])
 
+            # Clear previous plot before displaying new one
+            plot_area.empty()
+
             if analysis_selected != 'Select Analysis':
                 fig = go.Figure()
 
@@ -194,7 +197,7 @@ try:
 
                 plot_area.plotly_chart(fig, use_container_width=True)
 
-            if gpr_selected != 'Select GPR Plot':
+            elif gpr_selected != 'Select GPR Plot':
                 gpr_file_path = f"GPR/{selected_state}_{gpr_selected.split()[0]}.gif"
                 if os.path.exists(gpr_file_path):
                     plot_area.video(gpr_file_path, format="video/gif", caption=f"{gpr_selected} for {selected_state}")
