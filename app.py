@@ -125,7 +125,14 @@ try:
             # Clear previous plot before displaying new one
             plot_area.empty()
 
-            if analysis_selected != 'Select Analysis':
+            if gpr_selected != 'Select GPR Plot':
+                gpr_file_path = f"GPR/{selected_state}_{gpr_selected.split()[0]}.gif"
+                if os.path.exists(gpr_file_path):
+                    plot_area.image(gpr_file_path, format="GIF", caption=f"{gpr_selected} for {selected_state}")
+                else:
+                    st.warning(f"{gpr_selected} for {selected_state} not found. Ensure the file name is '{selected_state}_{gpr_selected.split()[0]}.gif' and it's in the GPR folder.")
+
+            elif analysis_selected != 'Select Analysis':
                 fig = go.Figure()
 
                 if selected_district != 'Select a District' and selected_district is not None:
@@ -196,13 +203,6 @@ try:
                 )
 
                 plot_area.plotly_chart(fig, use_container_width=True)
-
-            elif gpr_selected != 'Select GPR Plot':
-                gpr_file_path = f"GPR/{selected_state}_{gpr_selected.split()[0]}.gif"
-                if os.path.exists(gpr_file_path):
-                    plot_area.video(gpr_file_path, format="video/gif", caption=f"{gpr_selected} for {selected_state}")
-                else:
-                    st.warning(f"{gpr_selected} for {selected_state} not found. Ensure the file name is '{selected_state}_{gpr_selected.split()[0]}.gif' and it's in the GPR folder.")
 
     else:
         st.image(default_image, caption="Brinjal Price Analysis", use_container_width=True)
