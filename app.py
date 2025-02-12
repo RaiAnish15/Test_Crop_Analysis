@@ -18,7 +18,6 @@ price_file_path = "State_Modal_Price.csv"
 volatility_file_path = "State_Conditional_Volatility.csv"
 district_price_file_path = "District_Modal_price.csv"
 district_volatility_file_path = "District_Conditional_Volatility.csv"
-district_meteorological_file_path = "District_Meteorological.csv"
 
 try:
     # Reading the price data CSV file
@@ -36,11 +35,6 @@ try:
     # Reading the district-level conditional volatility CSV file
     district_volatility_data = pd.read_csv(district_volatility_file_path)
     district_volatility_data["Price Date"] = pd.to_datetime(district_volatility_data["Price Date"])
-
-    # Reading the district-level meteorological data CSV file
-    district_meteorological_data = pd.read_csv(district_meteorological_file_path)
-    district_meteorological_data["Price Date"] = pd.to_datetime(district_meteorological_data["Price Date"])
-
 
     states = list(price_data.columns[1:])  # Excluding 'Price Date' column
 
@@ -97,7 +91,7 @@ try:
             full_district_column = f"{selected_state}_{selected_crop}_{selected_district}"
 
             # Additional dropdown for district-level analysis type
-            district_analysis_type = st.sidebar.selectbox('Select District Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility', 'Temperature', 'Precipitation'])
+            district_analysis_type = st.sidebar.selectbox('Select District Analysis Type', ['Modal Price', 'Log Return', 'Conditional Volatility'])
 
             if district_analysis_type == 'Modal Price':
                 district_y_values = district_price_data[full_district_column]
@@ -114,34 +108,13 @@ try:
                 y_label = "Conditional Volatility"
                 line_color = 'cyan'
 
-            elif district_analysis_type == 'Temperature':
-                temp_column = f"{selected_state}_{selected_district}_Temperature"
-                if temp_column in district_meteorological_data.columns:
-                    district_y_values = district_meteorological_data[temp_column]
-                    y_label = "Temperature (°C)"
-                    line_color = 'orange'
-                else:
-                    st.warning(f"Temperature data for {selected_district} not found.")
-                    district_y_values = None
-
-            elif district_analysis_type == 'Precipitation':
-                precip_column = f"{selected_state}_{selected_district}_Precipitation"
-                if precip_column in district_meteorological_data.columns:
-                    district_y_values = district_meteorological_data[precip_column]
-                    y_label = "Precipitation (mm)"
-                    line_color = 'blue'
-                else:
-                    st.warning(f"Precipitation data for {selected_district} not found.")
-                    district_y_values = None
-
-            if district_y_values is not None:
-                fig.add_trace(go.Scatter(
-                    x=price_data["Price Date"], 
-                    y=district_y_values, 
-                    mode='lines', 
-                    name=f"{district_analysis_type} in {selected_district} ({selected_crop}), {selected_state}",
-                    line=dict(color=line_color, width=2)
-                ))
+            fig.add_trace(go.Scatter(
+                x=price_data["Price Date"], 
+                y=district_y_values, 
+                mode='lines', 
+                name=f"{district_analysis_type} in {selected_district} ({selected_crop}), {selected_state}",
+                line=dict(color=line_color, width=2)
+            ))
 
         fig.update_layout(
             xaxis_title="Date",
@@ -168,4 +141,4 @@ try:
         st.image(default_image, caption="Brinjal Price Analysis", use_container_width=True)
 
 except FileNotFoundError:
-    st.error("The required CSV files were not found. Please make sure 'State_Modal_Price.csv', 'State_Conditional_Volatility.csv', 'District_Modal_Price.csv', 'District_Conditional_Volatility.csv', and 'District_Meteorological.csv' are in the working directory.")
+    st.error("The required CSV files were not found. Please make sure 'State_Modal_Price.csv', 'State_Conditional_Volatility.csv', 'District_Modal_Price.csv', and 'District_Conditional_Volatility.csv' are in the working directory.")
