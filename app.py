@@ -151,7 +151,7 @@ try:
             if os.path.exists(gpr_file_path):
                 st.image(gpr_file_path, caption=f"{selected_gpr_plot} for {selected_state}", use_container_width=True)
             else:
-                st.warning(f"{selected_gpr_plot} for {selected_state} not found.")
+                st.warning(f"{selected_gpr_plot} for {selected_state} not found. Ensure the file name is '{selected_state}_{selected_gpr_plot.split()[0]}.gif' and it's in the GPR folder.")
 
         fig.update_layout(
             xaxis_title="Date",
