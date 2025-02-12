@@ -143,15 +143,17 @@ try:
                     line=dict(color=line_color, width=2)
                 ))
 
-            # Dropdown to display GPR GIFs
-            gpr_gifs = ['2D Plot', '3D Plot']
-            selected_gpr_plot = st.sidebar.selectbox('Select GPR Plot', gpr_gifs)
-            
-            gpr_file_path = f"GPR/{selected_state}_{selected_gpr_plot.split()[0]}.gif"
-            if os.path.exists(gpr_file_path):
-                st.image(gpr_file_path, caption=f"{selected_gpr_plot} for {selected_state}", use_container_width=True)
-            else:
-                st.warning(f"{selected_gpr_plot} for {selected_state} not found. Ensure the file name is '{selected_state}_{selected_gpr_plot.split()[0]}.gif' and it's in the GPR folder.")
+            # Dropdown to display GPR GIFs only after selection
+            show_gpr_plot = st.sidebar.checkbox('Show GPR Plot')
+            if show_gpr_plot:
+                gpr_gifs = ['2D Plot', '3D Plot']
+                selected_gpr_plot = st.sidebar.selectbox('Select GPR Plot', gpr_gifs)
+                
+                gpr_file_path = f"GPR/{selected_state}_{selected_gpr_plot.split()[0]}.gif"
+                if os.path.exists(gpr_file_path):
+                    st.video(gpr_file_path, format="video/gif", caption=f"{selected_gpr_plot} for {selected_state}")
+                else:
+                    st.warning(f"{selected_gpr_plot} for {selected_state} not found. Ensure the file name is '{selected_state}_{selected_gpr_plot.split()[0]}.gif' and it's in the GPR folder.")
 
         fig.update_layout(
             xaxis_title="Date",
