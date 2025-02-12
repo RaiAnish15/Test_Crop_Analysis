@@ -87,7 +87,7 @@ try:
                 line_color = 'green'
 
             fig.add_trace(go.Scatter(
-                x=price_data["Price Date"], 
+                x=volatility_data["Price Date"], 
                 y=y_values, 
                 mode='lines', 
                 name=f"{state_analysis_type} in {selected_state}",
