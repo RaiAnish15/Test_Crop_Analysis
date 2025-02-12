@@ -39,7 +39,8 @@ try:
 
     # Reading the district-level meteorological data CSV file
     district_meteorological_data = pd.read_csv(district_meteorological_file_path)
-    district_meteorological_data["Date"] = pd.to_datetime(district_meteorological_data["Date"])
+    district_meteorological_data["Price Date"] = pd.to_datetime(district_meteorological_data["Price Date"])
+
 
     states = list(price_data.columns[1:])  # Excluding 'Price Date' column
 
