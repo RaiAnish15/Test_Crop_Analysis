@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 from arch import arch_model
+import os
 
 # Title of the dashboard
 st.title("Analysis Across States, Crops, and Districts of INDIA")
@@ -40,8 +41,6 @@ try:
     # Reading the district-level meteorological data CSV file
     district_meteorological_data = pd.read_csv(district_meteorological_file_path)
     district_meteorological_data["Price Date"] = pd.to_datetime(district_meteorological_data["Price Date"])
-
-    
 
     states = list(price_data.columns[1:])  # Excluding 'Price Date' column
 
@@ -143,6 +142,16 @@ try:
                     name=f"{district_analysis_type} in {selected_district} ({selected_crop}), {selected_state}",
                     line=dict(color=line_color, width=2)
                 ))
+
+            # Dropdown to display GPR GIFs
+            gpr_gifs = ['2D Plot', '3D Plot']
+            selected_gpr_plot = st.sidebar.selectbox('Select GPR Plot', gpr_gifs)
+            
+            gpr_file_path = f"GPR/{selected_state}_{selected_gpr_plot.split()[0]}.gif"
+            if os.path.exists(gpr_file_path):
+                st.image(gpr_file_path, caption=f"{selected_gpr_plot} for {selected_state}", use_container_width=True)
+            else:
+                st.warning(f"{selected_gpr_plot} for {selected_state} not found.")
 
         fig.update_layout(
             xaxis_title="Date",
